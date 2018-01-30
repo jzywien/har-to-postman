@@ -10,7 +10,7 @@
       "name": "Launch Program",
       "program": "${workspaceFolder}/index.js",
       "args": [
-        "aiquic-dev.aig.net.har"
+        "Monoline-create sub-SaveQuote.har"
       ]
     }
   ]

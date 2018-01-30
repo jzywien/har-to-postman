@@ -44,3 +44,5 @@ __pycache__/
 *.har
 *.har.*
 /dist
+
+*.collection

@@ -1,6 +1,7 @@
 const fs = require('fs');
 const uuidV4 = require('uuid/v4');
 const {URL} = require('url');
+const querystring = require('querystring');
 
 const filename = process.argv[2];
 
@@ -45,12 +46,19 @@ const convertHarEntryToPostman = (entry) => {
   const body = getRequestBody(req);
   const header = getRequestHeader(req);
   const paths = entryUrl.pathname.split('/');
+  const isOAuth = paths.indexOf('oauth') !== -1;
   const trimmedPaths = paths.slice(2, paths.length);
+  const queryObjs = querystring.parse(entryUrl.search);
+  const query = Object.keys(queryObjs).map(key => ({
+    key: key.replace(/^\?/g, ''), 
+    value: queryObjs[key],
+    equals: true
+  }));
 
   return {
     name: `${req.method} - ${entryUrl.pathname}`,
     request: {
-      auth,
+      auth: !isOAuth && auth,
       method: req.method,
       header,
       body,
@@ -59,14 +67,18 @@ const convertHarEntryToPostman = (entry) => {
         host: [
           '{{baseurl}}'
         ],
-        path: trimmedPaths
+        path: trimmedPaths,
+        query
       }
     }
   }
 };
 
 const harToPostman = (har) => {
-  const entries = har.entries.filter(entry => entry.request.method != 'OPTIONS');
+  const entries = har.entries.filter(entry => 
+    (entry.request.url.indexOf('AIQUIC') !== -1) && 
+    (entry.request.method != 'OPTIONS')
+  );
   const postmanEntries = entries.map(convertHarEntryToPostman);
   return {
     info,
